@@ -14,9 +14,13 @@ public:
     Map();
     void draw(RenderWindow& window) const;
     bool isWall(int row, int col) const;
+    bool isFood(int row, int col) const;
+    
 
     // Accessors
     static int getRows() { return ROWS; }
     static int getCols() { return COLS; }
     static int getTileSize() { return TILE_SIZE; }
+
+    friend class FoodManager;
 };
