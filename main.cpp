@@ -305,12 +305,6 @@ protected:
 		return false;
 	}
 
-	// lITERALLY 0 POINT OF THIS FUNCTION...
-
-	//void changeDirection() {
-	//	//somelogic
-	//}
-
 public:
 
 	Ghost(Map* gameMap, Color ghostColor, float startX, float startY, Vector2f initialVelocity) :
