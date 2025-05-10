@@ -37,7 +37,7 @@ public:
 	Pac(Map* gameMap) : pacman(16.f), velocity(-3.f, 0.f), map(gameMap), premove("") {
 		pacman.setPosition(22 * 15.f + 8.f, 38.f * 15.f); // Center in tile
 		pacman.setFillColor(Color::Yellow);
-		pacman.setOrigin(8.f, 8.f); // Center origin
+		pacman.setOrigin(8.f, 8.f - 45.f); // Center origin
 	}
 
 	void draw(RenderWindow& window) {
@@ -113,7 +113,7 @@ public:
 	void update() {
 		//checking for premove
 		handlePremove(premove);
-		
+
 		// Predict new position
 		Vector2f newPosition = pacman.getPosition() + velocity;
 
@@ -170,7 +170,6 @@ private:
 	friend class Inky;
 	friend class Clyde;
 	friend class Blinky;
-	friend class Food;
 };
 
 class Food {
@@ -185,7 +184,7 @@ public:
 	Food(Map* fmap, Pac* pman, int rows, int cols) :isEaten(false), fmap(fmap), pman(pman), rows(rows), cols(cols), f(3.f) {
 
 		f.setFillColor(sf::Color::White);
-		f.setPosition(cols * 15.f + 5.f, rows * 15.f + 5.f);
+		f.setPosition(cols * 15.f + 2.5f, rows * 15.f + 2.5f + 45.f);
 	}
 
 	bool willEat(const Vector2f& newPosition) {
@@ -225,9 +224,20 @@ private:
 	Vector2f velocity;
 	int score = 0;
 
+	Font font;
+	Text scoreText;
+
 
 public:
 	FoodManager(Food* food, Map* fmap, Pac* pman) : food(food), fmap(fmap), pman(pman), velocity(-3.f, 0.f) {
+		if (!font.loadFromFile("E:/emulogic-font/Emulogic-zrEw.ttf")) {
+			std::cout << "could not open file" << std::endl;
+		}
+
+		scoreText.setFont(font);
+		scoreText.setCharacterSize(26);
+		scoreText.setFillColor(Color::White);
+		scoreText.setPosition(0.f, 10.f);
 	}
 
 	void Score() {
@@ -236,11 +246,13 @@ public:
 
 		pman->teleport(newPosition);
 
+
 		// update score when food is eaten
 		for (int k = 0; k < khaana; ++k) {
 			if (food[k].willEat(newPosition) && !food[k].isEaten) {
 				score += 10;
 				food[k].isEaten = true;
+				scoreText.setString("Score: " + std::to_string(score));
 			}
 		}
 	}
@@ -250,6 +262,8 @@ public:
 				window.draw(food[k].f);
 			}
 		}
+
+		window.draw(scoreText);
 	}
 
 };
@@ -344,7 +358,7 @@ public:
 		ghost.setFillColor(ghostColor);
 		position = Vector2f(startX * 15.f + 8.f, startY * 15.f + 8.f);
 		ghost.setPosition(position);
-		ghost.setOrigin(16.f, 16.f);
+		ghost.setOrigin(16.f, 16.f - 45.f);
 		speed = 0.75f;  // basic speed
 	}
 
@@ -468,7 +482,7 @@ class GameSimulation {};
 
 int main() {
 
-	RenderWindow window(VideoMode(690, 765), "PAC-MAN");
+	RenderWindow window(VideoMode(690, 765 + 45), "PAC-MAN");
 	window.setFramerateLimit(60);
 
 	Clock clock;
