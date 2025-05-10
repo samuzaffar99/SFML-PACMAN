@@ -62,7 +62,7 @@ void Map::draw(RenderWindow& window) const {
 			if (grid[i][j] == 1) {
 				sf::RectangleShape wall(sf::Vector2f(TILE_SIZE, TILE_SIZE));
 				wall.setFillColor(sf::Color::Blue);
-				wall.setPosition(j * 15.f, i * 15.f);
+				wall.setPosition(j * 15.f, i * 15.f + 45.f);
 				window.draw(wall);
 			}
 		}
