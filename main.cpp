@@ -31,10 +31,11 @@ private:
 	CircleShape pacman;
 	Vector2f velocity;
 	Map* map;
+	std::string premove;
 
 public:
-	Pac(Map* gameMap) : pacman(16.f), velocity(-3.f, 0.f), map(gameMap) {
-		pacman.setPosition(22 * 15.f + 8.f, 38.f * 15.f + 8.f); // Center in tile
+	Pac(Map* gameMap) : pacman(16.f), velocity(-3.f, 0.f), map(gameMap), premove("") {
+		pacman.setPosition(22 * 15.f + 8.f, 38.f * 15.f); // Center in tile
 		pacman.setFillColor(Color::Yellow);
 		pacman.setOrigin(8.f, 8.f); // Center origin
 	}
@@ -65,18 +66,44 @@ public:
 			Vector2f checkVelocity(velocity.x * 7, velocity.y * 7);
 			Vector2f newPosition = pacman.getPosition() + checkVelocity;
 			if (willCollide(newPosition)) {
+				premove = direction();
 				velocity = temp;
+			}
+			else {
+				premove = "";
+			}
+		}
+	}
+
+	void handlePremove(std::string dir) {
+		if (dir != "") {
+			Vector2f temp = velocity;
+			if (dir == "Right")
+				velocity = Vector2f(2.f, 0.f);
+			else if (dir == "Left")
+				velocity = Vector2f(-2.f, 0.f);
+			else if (dir == "Up")
+				velocity = Vector2f(0.f, -2.f);
+			else if (dir == "Down")
+				velocity = Vector2f(0.f, 2.f);
+			Vector2f checkVelocity(velocity.x * 7, velocity.y * 7);
+			Vector2f newPosition = pacman.getPosition() + checkVelocity;
+			if (willCollide(newPosition)) {
+				velocity = temp;
+			}
+			else {
+				premove = "";
 			}
 		}
 	}
 
 	void teleport(Vector2f& newPosition) {
 		if (newPosition.x < 10) {
-			pacman.setPosition(670, newPosition.y);
+			pacman.setPosition(660, newPosition.y);
 			pacman.move(velocity);
 			newPosition = pacman.getPosition();
 		}
-		else if (newPosition.x > 670) {
+		else if (newPosition.x > 660) {
 			pacman.setPosition(10, newPosition.y);
 			pacman.move(velocity);
 			newPosition = pacman.getPosition();
@@ -84,10 +111,14 @@ public:
 	}
 
 	void update() {
+		//checking for premove
+		handlePremove(premove);
+		
 		// Predict new position
 		Vector2f newPosition = pacman.getPosition() + velocity;
 
 		teleport(newPosition);
+
 
 		// Check collision in movement direction
 		if (!willCollide(newPosition)) {
@@ -111,7 +142,7 @@ private:
 	}
 
 	bool willCollide(const Vector2f& newPosition) {
-		// Get the 4 corners of Pacman's collision circle
+		// Get the 8 edges of Pacman's collision circle
 		float radius = pacman.getRadius();
 		Vector2f edges[8] = {
 			Vector2f(newPosition.x - radius, newPosition.y - radius), // top-left
@@ -124,10 +155,10 @@ private:
 			Vector2f(newPosition.x, newPosition.y + radius), //bottom
 		};
 
-		// Check each corner against walls
+		// Check each edge against walls
 		for (const auto& edge : edges) {
-			int col = static_cast<int>((edge.x / 15.f));
-			int row = static_cast<int>((edge.y / 15.f));
+			int col = static_cast<int>(round(edge.x / 15.f));
+			int row = static_cast<int>(round(edge.y / 15.f));
 			if (map->isWall(row, col)) {
 				return true;
 			}
@@ -171,10 +202,10 @@ public:
 			Vector2f(newPosition.x, newPosition.y + radius), //bottom
 		};
 
-		// Check each corner against food
+		// Check each edge against food
 		for (const auto& edge : edges) {
-			int col = static_cast<int>(((edge.x + 8.f) / 15.f));
-			int row = static_cast<int>(((edge.y + 8.f) / 15.f));
+			int col = static_cast<int>(round((edge.x + 3.f) / 15.f));
+			int row = static_cast<int>(round((edge.y + 5.f) / 15.f));
 			if (row == rows && col == cols) {
 				return true;
 			}
@@ -403,7 +434,7 @@ public:
 		}
 	}
 
-	
+
 };
 
 
@@ -462,7 +493,7 @@ int main() {
 
 	FoodManager manage(f, &map, &pac);
 
-	
+
 
 	while (window.isOpen()) {
 		Event event;
