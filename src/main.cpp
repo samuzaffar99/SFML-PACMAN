@@ -1,7 +1,7 @@
-// Hatim Check exactly WHY the ghosts are rubbing against the walls 
+// Hatim Check exactly WHY the ghosts are rubbing against the walls
 
 #include <SFML/Graphics.hpp>
-#include "Map.h"
+#include "map.hpp"
 #include <string>
 #include <iostream>
 #include <cmath>
@@ -19,41 +19,47 @@ class Clyde;
 class Inky;
 int const khaana = 184;
 
-
 // A rather Interesting Concept To
-//template <typename T>
-//T clamp(T value, T min, T max) {
+// template <typename T>
+// T clamp(T value, T min, T max) {
 //	return (value < min) ? min : (value > max) ? max : value;
 //}
 
-class Pac {
+class Pac
+{
 private:
 	CircleShape pacman;
 	Vector2f velocity;
-	Map* map;
+	Map *map;
 	std::string premove;
 
 public:
-	Pac(Map* gameMap) : pacman(16.f), velocity(-3.f, 0.f), map(gameMap), premove("") {
+	Pac(Map *gameMap) : pacman(16.f), velocity(-3.f, 0.f), map(gameMap), premove("")
+	{
 		pacman.setPosition(22 * 15.f + 8.f, 38.f * 15.f); // Center in tile
 		pacman.setFillColor(Color::Yellow);
 		pacman.setOrigin(8.f, 8.f - 45.f); // Center origin
 	}
 
-	void draw(RenderWindow& window) {
+	void draw(RenderWindow &window)
+	{
 		window.draw(pacman);
 	}
 
-	float getR() {
+	float getR()
+	{
 		return pacman.getRadius();
 	}
 
-	Vector2f getP() {
+	Vector2f getP()
+	{
 		return pacman.getPosition();
 	}
 
-	void handleInput(Event& event) {
-		if (event.type == Event::KeyPressed) {
+	void handleInput(Event &event)
+	{
+		if (event.type == Event::KeyPressed)
+		{
 			Vector2f temp = velocity;
 			if (event.key.code == Keyboard::Right)
 				velocity = Vector2f(2.f, 0.f);
@@ -65,18 +71,22 @@ public:
 				velocity = Vector2f(0.f, 2.f);
 			Vector2f checkVelocity(velocity.x * 7, velocity.y * 7);
 			Vector2f newPosition = pacman.getPosition() + checkVelocity;
-			if (willCollide(newPosition)) {
+			if (willCollide(newPosition))
+			{
 				premove = direction();
 				velocity = temp;
 			}
-			else {
+			else
+			{
 				premove = "";
 			}
 		}
 	}
 
-	void handlePremove(std::string dir) {
-		if (dir != "") {
+	void handlePremove(std::string dir)
+	{
+		if (dir != "")
+		{
 			Vector2f temp = velocity;
 			if (dir == "Right")
 				velocity = Vector2f(2.f, 0.f);
@@ -88,30 +98,36 @@ public:
 				velocity = Vector2f(0.f, 2.f);
 			Vector2f checkVelocity(velocity.x * 7, velocity.y * 7);
 			Vector2f newPosition = pacman.getPosition() + checkVelocity;
-			if (willCollide(newPosition)) {
+			if (willCollide(newPosition))
+			{
 				velocity = temp;
 			}
-			else {
+			else
+			{
 				premove = "";
 			}
 		}
 	}
 
-	void teleport(Vector2f& newPosition) {
-		if (newPosition.x < 10) {
+	void teleport(Vector2f &newPosition)
+	{
+		if (newPosition.x < 10)
+		{
 			pacman.setPosition(660, newPosition.y);
 			pacman.move(velocity);
 			newPosition = pacman.getPosition();
 		}
-		else if (newPosition.x > 660) {
+		else if (newPosition.x > 660)
+		{
 			pacman.setPosition(10, newPosition.y);
 			pacman.move(velocity);
 			newPosition = pacman.getPosition();
 		}
 	}
 
-	void update() {
-		//checking for premove
+	void update()
+	{
+		// checking for premove
 		handlePremove(premove);
 
 		// Predict new position
@@ -119,29 +135,36 @@ public:
 
 		teleport(newPosition);
 
-
 		// Check collision in movement direction
-		if (!willCollide(newPosition)) {
+		if (!willCollide(newPosition))
+		{
 			pacman.move(velocity);
 		}
 	}
 
 	// I added this getVelocity function here
 
-	Vector2f getVelocity() {
+	Vector2f getVelocity()
+	{
 		return velocity;
 	}
 
 private:
-	std::string direction() const {
-		if (velocity.x > 0) return "Right";
-		else if (velocity.x < 0) return "Left";
-		else if (velocity.y > 0) return "Down";
-		else if (velocity.y < 0) return "Up";
+	std::string direction() const
+	{
+		if (velocity.x > 0)
+			return "Right";
+		else if (velocity.x < 0)
+			return "Left";
+		else if (velocity.y > 0)
+			return "Down";
+		else if (velocity.y < 0)
+			return "Up";
 		return "None";
 	}
 
-	bool willCollide(const Vector2f& newPosition) {
+	bool willCollide(const Vector2f &newPosition)
+	{
 		// Get the 8 edges of Pacman's collision circle
 		float radius = pacman.getRadius();
 		Vector2f edges[8] = {
@@ -149,17 +172,19 @@ private:
 			Vector2f(newPosition.x + radius, newPosition.y - radius), // top-right
 			Vector2f(newPosition.x - radius, newPosition.y + radius), // bottom-left
 			Vector2f(newPosition.x + radius, newPosition.y + radius), // bottom-right
-			Vector2f(newPosition.x - radius, newPosition.y), //left
-			Vector2f(newPosition.x + radius, newPosition.y), //right
-			Vector2f(newPosition.x, newPosition.y - radius), //top
-			Vector2f(newPosition.x, newPosition.y + radius), //bottom
+			Vector2f(newPosition.x - radius, newPosition.y),		  // left
+			Vector2f(newPosition.x + radius, newPosition.y),		  // right
+			Vector2f(newPosition.x, newPosition.y - radius),		  // top
+			Vector2f(newPosition.x, newPosition.y + radius),		  // bottom
 		};
 
 		// Check each edge against walls
-		for (const auto& edge : edges) {
+		for (const auto &edge : edges)
+		{
 			int col = static_cast<int>(round(edge.x / 15.f));
 			int row = static_cast<int>(round(edge.y / 15.f));
-			if (map->isWall(row, col)) {
+			if (map->isWall(row, col))
+			{
 				return true;
 			}
 		}
@@ -172,22 +197,25 @@ private:
 	friend class Blinky;
 };
 
-class Food {
+class Food
+{
 	CircleShape f;
-	Map* fmap;
-	Pac* pman;
+	Map *fmap;
+	Pac *pman;
 	bool isEaten;
 	int rows, cols;
 
 public:
 	Food() {}
-	Food(Map* fmap, Pac* pman, int rows, int cols) :isEaten(false), fmap(fmap), pman(pman), rows(rows), cols(cols), f(3.f) {
+	Food(Map *fmap, Pac *pman, int rows, int cols) : isEaten(false), fmap(fmap), pman(pman), rows(rows), cols(cols), f(3.f)
+	{
 
 		f.setFillColor(sf::Color::White);
 		f.setPosition(cols * 15.f + 2.5f, rows * 15.f + 2.5f + 45.f);
 	}
 
-	bool willEat(const Vector2f& newPosition) {
+	bool willEat(const Vector2f &newPosition)
+	{
 
 		float radius = pman->getR();
 		Vector2f edges[8] = {
@@ -195,17 +223,19 @@ public:
 			Vector2f(newPosition.x + radius, newPosition.y - radius), // top-right
 			Vector2f(newPosition.x - radius, newPosition.y + radius), // bottom-left
 			Vector2f(newPosition.x + radius, newPosition.y + radius), // bottom-right
-			Vector2f(newPosition.x - radius, newPosition.y), //left
-			Vector2f(newPosition.x + radius, newPosition.y), //right
-			Vector2f(newPosition.x, newPosition.y - radius), //top
-			Vector2f(newPosition.x, newPosition.y + radius), //bottom
+			Vector2f(newPosition.x - radius, newPosition.y),		  // left
+			Vector2f(newPosition.x + radius, newPosition.y),		  // right
+			Vector2f(newPosition.x, newPosition.y - radius),		  // top
+			Vector2f(newPosition.x, newPosition.y + radius),		  // bottom
 		};
 
 		// Check each edge against food
-		for (const auto& edge : edges) {
+		for (const auto &edge : edges)
+		{
 			int col = static_cast<int>(round((edge.x + 3.f) / 15.f));
 			int row = static_cast<int>(round((edge.y + 5.f) / 15.f));
-			if (row == rows && col == cols) {
+			if (row == rows && col == cols)
+			{
 				return true;
 			}
 		}
@@ -213,25 +243,27 @@ public:
 	}
 
 	friend class FoodManager;
-
 };
 
-class FoodManager {
+class FoodManager
+{
 private:
-	Food* food;
-	Map* fmap;
-	Pac* pman;
+	Food *food;
+	Map *fmap;
+	Pac *pman;
 	Vector2f velocity;
 	int score = 0;
 
 	Font font;
 	Text scoreText;
 
-
 public:
-	FoodManager(Food* food, Map* fmap, Pac* pman) : food(food), fmap(fmap), pman(pman), velocity(-3.f, 0.f) {
-		if (!font.loadFromFile("E:/emulogic-font/Emulogic-zrEw.ttf")) {
-			std::cout << "could not open file" << std::endl;
+	FoodManager(Food *food, Map *fmap, Pac *pman) : food(food), fmap(fmap), pman(pman), velocity(-3.f, 0.f)
+	{
+		if (!font.loadFromFile("assets/fonts/Emulogic-zrEw.ttf"))
+		{
+			std::cerr << "Failed to load font!" << std::endl;
+			return;
 		}
 
 		scoreText.setFont(font);
@@ -240,48 +272,53 @@ public:
 		scoreText.setPosition(0.f, 10.f);
 	}
 
-	void Score() {
+	void Score()
+	{
 		// Predict new position
 		Vector2f newPosition = pman->getP() + velocity;
 
 		pman->teleport(newPosition);
 
-
 		// update score when food is eaten
-		for (int k = 0; k < khaana; ++k) {
-			if (food[k].willEat(newPosition) && !food[k].isEaten) {
+		for (int k = 0; k < khaana; ++k)
+		{
+			if (food[k].willEat(newPosition) && !food[k].isEaten)
+			{
 				score += 10;
 				food[k].isEaten = true;
 				scoreText.setString("Score: " + std::to_string(score));
 			}
 		}
 	}
-	void draw(RenderWindow& window) const {
-		for (int k = 0; k < khaana; ++k) {
-			if (!food[k].isEaten) {
+	void draw(RenderWindow &window) const
+	{
+		for (int k = 0; k < khaana; ++k)
+		{
+			if (!food[k].isEaten)
+			{
 				window.draw(food[k].f);
 			}
 		}
 
 		window.draw(scoreText);
 	}
-
 };
 
-
-class Ghost {
+class Ghost
+{
 protected:
 	RectangleShape ghost;
 	Vector2f position;
 	Color color;
 	Vector2f velocity;
 	float speed;
-	Map* map;
+	Map *map;
 	bool isScared = false;
 
 	// BFS LOGIC WHICH I UNDERSTOOD (I should be graded additional marks in DSA) ~Fuzail Raza
 
-	std::vector<Vector2f> bfs(const Vector2f& start, const Vector2f& target) {
+	std::vector<Vector2f> bfs(const Vector2f &start, const Vector2f &target)
+	{
 		int startCol = static_cast<int>(start.x / 15.f);
 		int startRow = static_cast<int>(start.y / 15.f);
 		int targetCol = static_cast<int>(target.x / 15.f);
@@ -291,38 +328,44 @@ protected:
 		std::map<std::pair<int, int>, std::pair<int, int>> parent;
 		std::vector<std::vector<bool>> visited(51, std::vector<bool>(46, false));
 
-		q.push({ startRow, startCol });
+		q.push({startRow, startCol});
 		visited[startRow][startCol] = true;
 
-		int dr[4] = { -1, 1, 0, 0 };
-		int dc[4] = { 0, 0, -1, 1 };
+		int dr[4] = {-1, 1, 0, 0};
+		int dc[4] = {0, 0, -1, 1};
 
-		while (!q.empty()) {
-			std::pair<int, int> current = q.front(); q.pop();
+		while (!q.empty())
+		{
+			std::pair<int, int> current = q.front();
+			q.pop();
 			int r = current.first;
 			int c = current.second;
 
 			if (r == targetRow && c == targetCol)
 				break;
 
-			for (int i = 0; i < 4; i++) {
+			for (int i = 0; i < 4; i++)
+			{
 				int nr = r + dr[i];
 				int nc = c + dc[i];
 
-				if (nr >= 0 && nr < 51 && nc >= 0 && nc < 46 && !map->isWall(nr, nc) && !visited[nr][nc]) {
+				if (nr >= 0 && nr < 51 && nc >= 0 && nc < 46 && !map->isWall(nr, nc) && !visited[nr][nc])
+				{
 					visited[nr][nc] = true;
-					q.push({ nr, nc });
-					parent[{nr, nc}] = { r, c };
+					q.push({nr, nc});
+					parent[{nr, nc}] = {r, c};
 				}
 			}
 		}
 
 		std::vector<Vector2f> path;
-		std::pair<int, int> current = { targetRow, targetCol };
+		std::pair<int, int> current = {targetRow, targetCol};
 
-		while (current != std::make_pair(startRow, startCol)) {
+		while (current != std::make_pair(startRow, startCol))
+		{
 			path.push_back(Vector2f(current.second * 15.f + 8.f, current.first * 15.f + 8.f));
-			if (parent.find(current) == parent.end()) break;
+			if (parent.find(current) == parent.end())
+				break;
 			current = parent[current];
 		}
 
@@ -330,20 +373,21 @@ protected:
 		return path;
 	}
 
-
-	bool willCollide(const Vector2f& newPosition) const {
+	bool willCollide(const Vector2f &newPosition) const
+	{
 		float halfSize = 8.f;
 		Vector2f edges[4] = {
 			Vector2f(newPosition.x - halfSize, newPosition.y - halfSize),
 			Vector2f(newPosition.x + halfSize, newPosition.y - halfSize),
 			Vector2f(newPosition.x - halfSize, newPosition.y + halfSize),
-			Vector2f(newPosition.x + halfSize, newPosition.y + halfSize)
-		};
+			Vector2f(newPosition.x + halfSize, newPosition.y + halfSize)};
 
-		for (const auto& edge : edges) {
+		for (const auto &edge : edges)
+		{
 			int col = static_cast<int>(edge.x / 15.f);
 			int row = static_cast<int>(edge.y / 15.f);
-			if (map->isWall(row, col)) {
+			if (map->isWall(row, col))
+			{
 				return true;
 			}
 		}
@@ -351,50 +395,55 @@ protected:
 	}
 
 public:
-
-	Ghost(Map* gameMap, Color ghostColor, float startX, float startY, Vector2f initialVelocity) :
-		map(gameMap), color(ghostColor), velocity(initialVelocity) {
+	Ghost(Map *gameMap, Color ghostColor, float startX, float startY, Vector2f initialVelocity) : map(gameMap), color(ghostColor), velocity(initialVelocity)
+	{
 		ghost.setSize(Vector2f(32.f, 32.f));
 		ghost.setFillColor(ghostColor);
 		position = Vector2f(startX * 15.f + 8.f, startY * 15.f + 8.f);
 		ghost.setPosition(position);
 		ghost.setOrigin(16.f, 16.f - 45.f);
-		speed = 0.75f;  // basic speed
+		speed = 0.75f; // basic speed
 	}
 
-
-	void draw(RenderWindow& window) {
+	void draw(RenderWindow &window)
+	{
 		window.draw(ghost);
 	}
 
-	void update() {
+	void update()
+	{
 		Vector2f newPos = ghost.getPosition() + velocity;
-		if (willCollide(newPos)) {
+		if (willCollide(newPos))
+		{
 			velocity = -velocity;
 		}
-		else {
+		else
+		{
 			ghost.move(velocity);
 		}
 	}
 
-	virtual void MoveGhost(Pac& pac) = 0; // pure virtual
+	virtual void MoveGhost(Pac &pac) = 0; // pure virtual
 
 	virtual ~Ghost() {}
 	Vector2f getPosition() const { return position; }
 };
 
-class Blinky : public Ghost {
+class Blinky : public Ghost
+{
 private:
 public:
-	Blinky(Map* map) : Ghost(map, Color(255, 0, 0, 255), 22.5, 18.5, Vector2f(-1.5f, 0.f)) {}
+	Blinky(Map *map) : Ghost(map, Color(255, 0, 0, 255), 22.5, 18.5, Vector2f(-1.5f, 0.f)) {}
 
-	void MoveGhost(Pac& pac) override {
+	void MoveGhost(Pac &pac) override
+	{
 		Vector2f startPos = ghost.getPosition();
 		Vector2f targetPos = pac.getP();
 
 		std::vector<Vector2f> path = bfs(startPos, targetPos);
 
-		if (!path.empty()) {
+		if (!path.empty())
+		{
 			Vector2f next = path[0];
 			Vector2f dir = next - startPos;
 
@@ -406,10 +455,10 @@ public:
 			ghost.move(velocity);
 		}
 	}
-
 };
 
-class Pinky : public Ghost {
+class Pinky : public Ghost
+{
 private:
 	// Will consider the timings thoroughly later
 
@@ -417,11 +466,13 @@ private:
 	sf::Clock releaseClock;
 
 public:
-	Pinky(Map* map) : Ghost(map, Color(246, 87, 214), 22.5, 23, Vector2f(0.f, 0.f)) {
+	Pinky(Map *map) : Ghost(map, Color(246, 87, 214), 22.5, 23, Vector2f(0.f, 0.f))
+	{
 		releaseClock.restart();
 	}
 
-	void MoveGhost(Pac& pac) override {
+	void MoveGhost(Pac &pac) override
+	{
 		Vector2f startPos = ghost.getPosition();
 		Vector2f pacPos = pac.getP();
 		Vector2f pacVel = pac.getVelocity();
@@ -430,43 +481,46 @@ public:
 
 		Vector2f predictedPos = pacPos + pacVel * 4.f;
 
-		// Predicted pos is basically 4 tiles ahead of where the pacman is facing 
+		// Predicted pos is basically 4 tiles ahead of where the pacman is facing
 
 		std::vector<Vector2f> path = bfs(startPos, predictedPos);
 
-		if (!path.empty()) {
+		if (!path.empty())
+		{
 			Vector2f next = path[0];
 			Vector2f dir = next - startPos;
 
 			float length = std::sqrt(dir.x * dir.x + dir.y * dir.y); // Distance formula to check if it is 0 or nah
-			if (length != 0) {
+			if (length != 0)
+			{
 				dir /= length;
 			}
 
-			velocity = dir * 0.70f;  // Apparantely Pinky slower than Blinky
+			velocity = dir * 0.70f; // Apparantely Pinky slower than Blinky
 			ghost.move(velocity);
 		}
 	}
-
-
 };
 
-
-class Inky : public Ghost {
+class Inky : public Ghost
+{
 public:
-	Inky(Map* map) : Ghost(map, Color::Cyan, 19.5, 23, Vector2f(0.f, 1.5f)) {}
+	Inky(Map *map) : Ghost(map, Color::Cyan, 19.5, 23, Vector2f(0.f, 1.5f)) {}
 
-	void MoveGhost(Pac& pac) override {
+	void MoveGhost(Pac &pac) override
+	{
 		// Uses logic of Blinky and Pinky
-		// Will most likely try to implement soon... 
+		// Will most likely try to implement soon...
 	}
 };
 
-class Clyde : public Ghost {
+class Clyde : public Ghost
+{
 public:
-	Clyde(Map* map) : Ghost(map, Color(255, 165, 0), 25.5, 23, Vector2f(0.f, -1.5f)) {}
+	Clyde(Map *map) : Ghost(map, Color(255, 165, 0), 25.5, 23, Vector2f(0.f, -1.5f)) {}
 
-	void MoveGhost(Pac& pac) override {
+	void MoveGhost(Pac &pac) override
+	{
 		/*If he's far from Pac-Man (more than 8 tiles), he chases Pac-Man like Blinky.
 		If he's close to Pac-Man (within 8 tiles), he gets scared and retreats to his scatter corner (bottom-left of the map).
 		Steps:
@@ -476,11 +530,12 @@ public:
 	}
 };
 
+class GameSimulation
+{
+};
 
-class GameSimulation {};
-
-
-int main() {
+int main()
+{
 
 	RenderWindow window(VideoMode(690, 765 + 45), "PAC-MAN");
 	window.setFramerateLimit(60);
@@ -490,28 +545,30 @@ int main() {
 	Map map;
 	Pac pac(&map);
 	Blinky shadow(&map);
-	Clyde pokey(&map); //pookie ghost hehe :ribbon (why are you adding dumb comments to this very serious project of ours seniya  -zaid)
+	Clyde pokey(&map); // pookie ghost hehe :ribbon (why are you adding dumb comments to this very serious project of ours seniya  -zaid)
 	Pinky speedy(&map);
 	Inky bashful(&map);
 	Food f[khaana];
 	int foodIndex = 0;
-	for (int i = 0; i < 51; ++i) {
-		for (int j = 0; j < 46; ++j) {
-			if (map.isFood(i, j) && foodIndex < khaana) {
+	for (int i = 0; i < 51; ++i)
+	{
+		for (int j = 0; j < 46; ++j)
+		{
+			if (map.isFood(i, j) && foodIndex < khaana)
+			{
 				f[foodIndex] = Food(&map, &pac, i, j);
 				++foodIndex;
 			}
 		}
 	}
 
-
 	FoodManager manage(f, &map, &pac);
 
-
-
-	while (window.isOpen()) {
+	while (window.isOpen())
+	{
 		Event event;
-		while (window.pollEvent(event)) {
+		while (window.pollEvent(event))
+		{
 			if (event.type == Event::Closed)
 				window.close();
 
@@ -523,8 +580,7 @@ int main() {
 
 		// GHOST CHASE TIME >v<
 		shadow.MoveGhost(pac); // Blinky chases Pac-Man
-		speedy.MoveGhost(pac);  // Pinky bbg traps Pac-Man
-
+		speedy.MoveGhost(pac); // Pinky bbg traps Pac-Man
 
 		window.clear(Color::Black);
 		map.draw(window);
@@ -540,9 +596,7 @@ int main() {
 		bashful.update();
 		pokey.update();
 
-
 		window.display();
-
 	}
 
 	return 0;

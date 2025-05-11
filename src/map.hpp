@@ -12,10 +12,9 @@ private:
 
 public:
     Map();
-    void draw(RenderWindow& window) const;
+    void draw(RenderWindow &window) const;
     bool isWall(int row, int col) const;
     bool isFood(int row, int col) const;
-    
 
     // Accessors
     static int getRows() { return ROWS; }
