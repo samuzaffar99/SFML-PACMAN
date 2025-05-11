@@ -21,8 +21,10 @@ try {
     Write-Host "Building the project..."
     cmake --build .
 
+    Set-Location -Path "Debug"
+
     # Run the executable
-    $exe = "Debug/SFML-PACMAN.exe"
+    $exe = "SFML-PACMAN.exe"
     if (Test-Path -Path $exe) {
         Write-Host "Launching $exe..."
         Start-Process -FilePath ".\$exe" -NoNewWindow
